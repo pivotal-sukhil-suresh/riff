@@ -26,22 +26,29 @@ import (
 
 //go:generate mockery -name=KubeCtl -inpkg
 type KubeCtl interface {
-	Exec(cmdArgs []string) (string, error)
+	Exec(cmdArgs []string, duration ...time.Duration) (string, error)
 	ExecStdin(cmdArgs []string, stdin *[]byte) (string, error)
 }
+
+const defaultTimeoutDuration = 20 * time.Second
 
 // processKubeCtl interacts with kubernetes by spawning a process and running the kubectl
 // command line tool.
 type processKubeCtl struct {
 }
 
-func (kc *processKubeCtl) Exec(cmdArgs []string) (string, error) {
-	out, err := osutils.Exec("kubectl", cmdArgs, 20*time.Second)
+func (kc *processKubeCtl) Exec(cmdArgs []string, duration ...time.Duration) (string, error) {
+	timeoutDuration := defaultTimeoutDuration
+	if len(duration) > 0 {
+		timeoutDuration = duration[0]
+	}
+
+	out, err := osutils.Exec("kubectl", cmdArgs, timeoutDuration)
 	return string(out), err
 }
 
 func (kc *processKubeCtl) ExecStdin(cmdArgs []string, stdin *[]byte) (string, error) {
-	out, err := osutils.ExecStdin("kubectl", cmdArgs, stdin, 20*time.Second)
+	out, err := osutils.ExecStdin("kubectl", cmdArgs, stdin, defaultTimeoutDuration)
 	return string(out), err
 }
 
@@ -49,7 +56,7 @@ func (kc *processKubeCtl) ExecStdin(cmdArgs []string, stdin *[]byte) (string, er
 type dryRunKubeCtl struct {
 }
 
-func (kc *dryRunKubeCtl) Exec(cmdArgs []string) (string, error) {
+func (kc *dryRunKubeCtl) Exec(cmdArgs []string, duration ...time.Duration) (string, error) {
 	fmt.Printf("%s command: kubectl %s\n", strings.Title(cmdArgs[0]), strings.Join(cmdArgs, " "))
 	return "", nil
 }
