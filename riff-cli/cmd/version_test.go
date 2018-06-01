@@ -25,6 +25,7 @@ import (
 	"github.com/projectriff/riff/riff-cli/global"
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 	"github.com/spf13/cobra"
+	"time"
 )
 
 var _ = Describe("The version command", func() {
@@ -60,7 +61,7 @@ var _ = Describe("The version command", func() {
 	})
 
 	It("should list the cli, component, and invoker versions", func() {
-		kubeClient.On("Exec", []string{"config", "current-context"}).Return("minikube\n", nil).Once()
+		kubeClient.On("Exec", []string{"config", "current-context"}, 5 * time.Second).Return("minikube\n", nil).Once()
 		kubeClient.On("Exec", listComponetsKubeArgs).Return("<Component Table>\n", nil).Once()
 		kubeClient.On("Exec", listInvokersKubeArgs).Return("<Invokers Table>\n", nil).Once()
 
@@ -77,7 +78,7 @@ var _ = Describe("The version command", func() {
 	})
 
 	It("should list the cli version even when kubectl fails", func() {
-		kubeClient.On("Exec", []string{"config", "current-context"}).Return("", fmt.Errorf("kubectl fault")).Once()
+		kubeClient.On("Exec", []string{"config", "current-context"}, 5 * time.Second).Return("", fmt.Errorf("kubectl fault")).Once()
 		kubeClient.On("Exec", listComponetsKubeArgs).Return("", fmt.Errorf("kubectl fault")).Once()
 		kubeClient.On("Exec", listInvokersKubeArgs).Return("", fmt.Errorf("kubectl fault")).Once()
 

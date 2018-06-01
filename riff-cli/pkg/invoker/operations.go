@@ -31,6 +31,7 @@ import (
 	projectriff_v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1alpha1"
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
+	"time"
 )
 
 type invokerOperations struct {
@@ -187,7 +188,7 @@ func listFromDisk(invokerPaths []string) ([]projectriff_v1.Invoker, error) {
 }
 
 func listFromKubeCtl(kubeCtl kubectl.KubeCtl) ([]projectriff_v1.Invoker, error) {
-	str, err := kubeCtl.Exec([]string{"get", "Invokers", "-o", "json"})
+	str, err := kubeCtl.Exec([]string{"get", "Invokers", "-o", "json"}, 5 * time.Second)
 	if err != nil {
 		return nil, err
 	}

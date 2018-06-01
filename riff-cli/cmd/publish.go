@@ -31,6 +31,7 @@ import (
 	"github.com/projectriff/riff/riff-cli/pkg/minikube"
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 	"github.com/spf13/cobra"
+	"github.com/projectriff/riff/riff-cli/cmd/utils"
 )
 
 type publishOptions struct {
@@ -63,7 +64,9 @@ will post '{"hello":"world"}' as json to the 'concat' topic and wait for a reply
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
-			ipAddress, port, err := lookupAddress(kube, minik)
+			//ipAddress, port, err := lookupAddress(kube, minik)
+			//TODO: Need to fix publish_test before getting rid of lookupAddress
+			ipAddress, port, err := utils.NewComponentLookupHelper(kube, minik).Lookup("http-gateway")
 			if err != nil {
 				return err
 			}
